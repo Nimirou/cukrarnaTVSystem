@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-zinc-900">Přehledová obrazovka</h1>
-        <p className="text-zinc-500 text-sm mt-1">
+        <p className="text-zinc-900 text-sm mt-1">
           Přehled všech displejů a obsahu
         </p>
       </div>
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <p className="text-zinc-600 text-sm">Žádný náhled</p>
+                    <p className="text-white text-sm">Žádný náhled</p>
                   </div>
                 )}
                 <div className="absolute top-2 right-2">
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
                     className={`text-xs px-2 py-1 rounded-full font-medium ${
                       hasContent
                         ? "bg-green-100 text-green-700"
-                        : "bg-zinc-200 text-zinc-500"
+                        : "bg-zinc-200 text-zinc-900"
                     }`}
                   >
                     {hasContent ? "Aktivní" : "Prázdný"}
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
               {/* Info */}
               <div className="p-4">
                 <h3 className="font-semibold text-lg">{d.name}</h3>
-                <div className="mt-2 space-y-1 text-sm text-zinc-500">
+                <div className="mt-2 space-y-1 text-sm text-zinc-900">
                   <p>
                     Režim: <span className="text-zinc-700">{modeLabels[d.mode] || d.mode}</span>
                   </p>
@@ -158,7 +158,7 @@ export default function AdminDashboard() {
       </div>
 
       {displays.length === 0 && (
-        <p className="text-zinc-500 mt-4">
+        <p className="text-zinc-900 mt-4">
           Žádné displeje. Vytvořte je v sekci{" "}
           <Link href="/admin/displays" className="text-blue-600 underline">
             Displeje

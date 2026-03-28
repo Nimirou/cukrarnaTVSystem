@@ -112,7 +112,7 @@ export default function DisplayEditPage({
         <Link href="/admin/displays" className="text-blue-600 hover:underline">
           Displeje
         </Link>
-        <span className="text-zinc-400">/</span>
+        <span className="text-zinc-900">/</span>
         <h1 className="text-2xl font-bold text-zinc-900">{display.name}</h1>
       </div>
 
@@ -168,7 +168,7 @@ export default function DisplayEditPage({
           Přiřazená média ({assignedMedia.length})
         </h2>
         {assignedMedia.length === 0 ? (
-          <p className="text-zinc-500 text-sm">
+          <p className="text-zinc-900 text-sm">
             Žádná média. Vyberte z dostupných níže.
           </p>
         ) : (
@@ -256,7 +256,7 @@ export default function DisplayEditPage({
           })}
         </div>
         {allMedia.length === 0 && (
-          <p className="text-zinc-500 text-sm">
+          <p className="text-zinc-900 text-sm">
             Žádná média.{" "}
             <Link href="/admin/media" className="text-blue-600 underline">
               Nahrajte je

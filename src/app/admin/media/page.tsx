@@ -82,9 +82,9 @@ export default function MediaPage() {
           onChange={(e) => e.target.files && uploadFiles(e.target.files)}
         />
         {uploading ? (
-          <p className="text-zinc-500">Nahrávám...</p>
+          <p className="text-zinc-900">Nahrávám...</p>
         ) : (
-          <p className="text-zinc-500">
+          <p className="text-zinc-900">
             Přetáhněte soubory sem nebo klikněte pro výběr
           </p>
         )}
@@ -116,10 +116,10 @@ export default function MediaPage() {
               </div>
             )}
             <div className="p-2">
-              <p className="text-xs text-zinc-600 truncate" title={m.filename}>
+              <p className="text-xs text-zinc-900 truncate" title={m.filename}>
                 {m.filename}
               </p>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-700">
                 {(m.size / 1024 / 1024).toFixed(1)} MB
               </p>
             </div>
@@ -134,7 +134,7 @@ export default function MediaPage() {
       </div>
 
       {media.length === 0 && !uploading && (
-        <p className="text-zinc-500 text-center mt-8">
+        <p className="text-zinc-900 text-center mt-8">
           Žádná média. Nahrajte obrázky nebo videa.
         </p>
       )}

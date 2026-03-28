@@ -74,7 +74,7 @@ export default function DisplaysPage() {
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="font-semibold text-lg">{d.name}</h2>
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-zinc-900">
                   Režim: {d.mode}
                   {d.mode === "slideshow" && ` (${d.interval}s)`} | Položek:{" "}
                   {d.items.length}
@@ -108,7 +108,7 @@ export default function DisplaysPage() {
       </div>
 
       {displays.length === 0 && (
-        <p className="text-zinc-500 mt-4">
+        <p className="text-zinc-900 mt-4">
           Žádné displeje. Vytvořte nový displej výše.
         </p>
       )}
