@@ -9,6 +9,7 @@ const UPLOADS_DIR = path.join(process.cwd(), "uploads");
 export async function GET() {
   const media = await prisma.media.findMany({
     orderBy: { createdAt: "desc" },
+    include: { tags: { include: { tag: true } } },
   });
   return NextResponse.json(media);
 }

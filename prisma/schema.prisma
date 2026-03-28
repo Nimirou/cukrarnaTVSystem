@@ -16,6 +16,23 @@ model Media {
   createdAt DateTime @default(now())
 
   displayItems DisplayItem[]
+  tags         MediaTag[]
+}
+
+model Tag {
+  id    String     @id @default(cuid())
+  name  String     @unique
+  media MediaTag[]
+}
+
+model MediaTag {
+  id      String @id @default(cuid())
+  mediaId String
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  tagId   String
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([mediaId, tagId])
 }
 
 model Display {

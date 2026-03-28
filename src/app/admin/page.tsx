@@ -57,14 +57,14 @@ export default function AdminDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white rounded-lg shadow p-4">
+        <Link href="/admin/displays" className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
           <p className="text-sm font-medium text-zinc-900">Displeje</p>
           <p className="text-3xl font-bold mt-1 text-zinc-900">{displays.length}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
+        </Link>
+        <Link href="/admin/media" className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow">
           <p className="text-sm font-medium text-zinc-900">Nahraná média</p>
           <p className="text-3xl font-bold mt-1 text-zinc-900">{mediaCount}</p>
-        </div>
+        </Link>
         <div className="bg-white rounded-lg shadow p-4">
           <p className="text-sm font-medium text-zinc-900">Přiřazený obsah celkem</p>
           <p className="text-3xl font-bold mt-1 text-zinc-900">{totalItems}</p>

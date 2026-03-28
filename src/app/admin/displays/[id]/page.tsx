@@ -3,11 +3,22 @@
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
 
+interface Tag {
+  id: string;
+  name: string;
+}
+
+interface MediaTag {
+  id: string;
+  tag: Tag;
+}
+
 interface Media {
   id: string;
   filename: string;
   path: string;
   mimeType: string;
+  tags: MediaTag[];
 }
 
 interface DisplayItem {
@@ -37,6 +48,8 @@ export default function DisplayEditPage({
   const [interval, setInterval] = useState(5);
   const [assignedMedia, setAssignedMedia] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
+  const [tags, setTags] = useState<Tag[]>([]);
+  const [filterTag, setFilterTag] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/displays/${id}`)
@@ -51,6 +64,9 @@ export default function DisplayEditPage({
     fetch("/api/media")
       .then((r) => r.json())
       .then(setAllMedia);
+    fetch("/api/tags")
+      .then((r) => r.json())
+      .then(setTags);
   }, [id]);
 
   const save = async () => {
@@ -226,8 +242,35 @@ export default function DisplayEditPage({
       {/* Available media */}
       <div className="bg-white rounded-lg shadow p-4 mb-6">
         <h2 className="font-semibold mb-3 text-zinc-900">Dostupná média</h2>
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            <button
+              onClick={() => setFilterTag(null)}
+              className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                filterTag === null
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-zinc-900 border-zinc-300 hover:border-zinc-400"
+              }`}
+            >
+              Vše
+            </button>
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => setFilterTag(filterTag === tag.id ? null : tag.id)}
+                className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                  filterTag === tag.id
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white text-zinc-900 border-zinc-300 hover:border-zinc-400"
+                }`}
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-          {allMedia.map((m) => {
+          {allMedia.filter((m) => !filterTag || m.tags?.some((t) => t.tag.id === filterTag)).map((m) => {
             const isAssigned = assignedMedia.includes(m.id);
             return (
               <div

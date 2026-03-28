@@ -44,7 +44,7 @@ export default function DisplaysPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Displeje</h1>
+      <h1 className="text-2xl font-bold mb-6 text-zinc-900">Displeje</h1>
 
       {/* Create new */}
       <div className="flex gap-2 mb-6">
@@ -53,7 +53,7 @@ export default function DisplaysPage() {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Název nového displeje..."
-          className="border rounded-md px-3 py-2 flex-1 max-w-xs"
+          className="border rounded-md px-3 py-2 flex-1 max-w-xs text-zinc-900"
           onKeyDown={(e) => e.key === "Enter" && createDisplay()}
         />
         <button
@@ -73,7 +73,7 @@ export default function DisplaysPage() {
           >
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="font-semibold text-lg">{d.name}</h2>
+                <h2 className="font-semibold text-lg text-zinc-900">{d.name}</h2>
                 <p className="text-sm text-zinc-900">
                   Režim: {d.mode}
                   {d.mode === "slideshow" && ` (${d.interval}s)`} | Položek:{" "}
@@ -90,7 +90,7 @@ export default function DisplaysPage() {
             <div className="mt-3 flex gap-2">
               <Link
                 href={`/admin/displays/${d.id}`}
-                className="text-sm bg-zinc-100 hover:bg-zinc-200 px-3 py-1 rounded"
+                className="text-sm bg-zinc-700 text-white hover:bg-zinc-800 px-3 py-1 rounded"
               >
                 Upravit
               </Link>
