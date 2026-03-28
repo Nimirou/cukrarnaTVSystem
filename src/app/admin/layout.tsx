@@ -20,7 +20,7 @@ export default function AdminLayout({
     <div className="flex h-screen">
       <aside className="w-56 bg-zinc-900 text-white flex flex-col">
         <div className="p-4 text-lg font-bold border-b border-zinc-700">
-          Cukrarna Signage
+          Cukrárna Signage
         </div>
         <nav className="flex-1 p-2">
           {navItems.map((item) => {
