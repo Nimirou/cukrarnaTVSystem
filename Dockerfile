@@ -28,13 +28,17 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+
+# Copy full node_modules for prisma migrate
+COPY --from=builder /app/node_modules ./node_modules
 
 # Create directories for persistent data
 RUN mkdir -p /app/uploads /app/data
 RUN chown -R nextjs:nodejs /app/uploads /app/data
+
+# Migration script
+RUN printf '#!/bin/sh\nnpx prisma migrate deploy --schema=./prisma/schema.prisma\nexec node server.js\n' > /app/start.sh
+RUN chmod +x /app/start.sh
 
 USER nextjs
 
@@ -43,4 +47,4 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 ENV DATABASE_URL="file:/app/data/prod.db"
 
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy --schema=./prisma/schema.prisma && node server.js"]
+CMD ["/app/start.sh"]
