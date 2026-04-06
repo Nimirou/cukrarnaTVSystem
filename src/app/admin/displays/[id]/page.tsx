@@ -2,6 +2,8 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { SortableMediaList } from "@/components/SortableMediaList";
+import { DisplayPreview } from "./DisplayPreview";
 
 interface Tag {
   id: string;
@@ -332,27 +334,6 @@ function DayEditor({
     onUpdate(dateKey, { mediaIds: newIds, showUntilMap });
   };
 
-  const moveUp = (index: number) => {
-    if (index === 0) return;
-    const next = [...mediaIds];
-    [next[index - 1], next[index]] = [next[index], next[index - 1]];
-    onUpdate(dateKey, { mediaIds: next, showUntilMap });
-  };
-
-  const moveDown = (index: number) => {
-    if (index >= mediaIds.length - 1) return;
-    const next = [...mediaIds];
-    [next[index], next[index + 1]] = [next[index + 1], next[index]];
-    onUpdate(dateKey, { mediaIds: next, showUntilMap });
-  };
-
-  const setShowUntil = (mediaId: string, value: string) => {
-    onUpdate(dateKey, {
-      mediaIds,
-      showUntilMap: { ...showUntilMap, [mediaId]: value },
-    });
-  };
-
   const [y, m, d] = dateKey.split("-");
   const label = `${parseInt(d)}. ${parseInt(m)}. ${y}`;
 
@@ -375,66 +356,18 @@ function DayEditor({
           Žádná média pro tento den. Vyberte z dostupných níže.
         </p>
       ) : (
-        <div className="space-y-2 mb-4">
-          {mediaIds.map((mediaId, index) => {
-            const med = allMedia.find((m) => m.id === mediaId);
-            if (!med) return null;
-            return (
-              <div
-                key={`${dateKey}-${mediaId}-${index}`}
-                className="flex items-center gap-3 bg-zinc-50 rounded-md p-2"
-              >
-                <span className="text-xs text-zinc-900 w-6 text-center font-medium">
-                  {index + 1}
-                </span>
-                {isVideo(med.mimeType) ? (
-                  <div className="w-16 h-10 bg-zinc-900 rounded flex items-center justify-center text-white text-xs">
-                    Video
-                  </div>
-                ) : (
-                  <img
-                    src={`/api/uploads/${med.path}`}
-                    alt={med.filename}
-                    className="w-16 h-10 object-cover rounded"
-                  />
-                )}
-                <span className="flex-1 text-sm truncate text-zinc-900">{med.filename}</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-zinc-500">do:</span>
-                  {index < mediaIds.length - 1 ? (
-                    <input
-                      type="time"
-                      value={showUntilMap[mediaId] || ""}
-                      onChange={(e) => setShowUntil(mediaId, e.target.value)}
-                      className="border rounded px-2 py-1 text-xs text-zinc-900 w-24"
-                    />
-                  ) : (
-                    <span className="text-xs text-zinc-500 italic">konce dne</span>
-                  )}
-                </div>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => moveUp(index)}
-                    className="text-xs px-2 py-1 bg-zinc-700 text-white rounded hover:bg-zinc-800"
-                  >
-                    &uarr;
-                  </button>
-                  <button
-                    onClick={() => moveDown(index)}
-                    className="text-xs px-2 py-1 bg-zinc-700 text-white rounded hover:bg-zinc-800"
-                  >
-                    &darr;
-                  </button>
-                  <button
-                    onClick={() => toggleMedia(mediaId)}
-                    className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
-                  >
-                    Odebrat
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+        <div className="mb-4">
+          <SortableMediaList
+            mediaIds={mediaIds}
+            allMedia={allMedia}
+            showUntilMap={showUntilMap}
+            showTimeInputs={true}
+            onReorder={(newIds) => onUpdate(dateKey, { mediaIds: newIds, showUntilMap })}
+            onRemove={(id) => toggleMedia(id)}
+            onShowUntilChange={(id, val) =>
+              onUpdate(dateKey, { mediaIds, showUntilMap: { ...showUntilMap, [id]: val } })
+            }
+          />
         </div>
       )}
 
@@ -742,23 +675,6 @@ export default function DisplayEditPage({
     );
   };
 
-  const moveUp = (index: number) => {
-    if (index === 0) return;
-    setAssignedMedia((prev) => {
-      const next = [...prev];
-      [next[index - 1], next[index]] = [next[index], next[index - 1]];
-      return next;
-    });
-  };
-
-  const moveDown = (index: number) => {
-    setAssignedMedia((prev) => {
-      if (index >= prev.length - 1) return prev;
-      const next = [...prev];
-      [next[index], next[index + 1]] = [next[index + 1], next[index]];
-      return next;
-    });
-  };
 
   // Date mode helpers
   const updateDaySchedule = (dateKey: string, schedule: DaySchedule) => {
@@ -912,41 +828,15 @@ export default function DisplayEditPage({
             {assignedMedia.length === 0 ? (
               <p className="text-zinc-500 text-sm">Žádná média. Vyberte z dostupných níže.</p>
             ) : (
-              <div className="space-y-2">
-                {assignedMedia.map((mediaId, index) => {
-                  const m = allMedia.find((m) => m.id === mediaId);
-                  if (!m) return null;
-                  return (
-                    <div key={mediaId} className="flex items-center gap-3 bg-zinc-50 rounded-md p-2">
-                      <span className="text-xs text-zinc-900 w-6 text-center font-medium">{index + 1}</span>
-                      {isVideo(m.mimeType) ? (
-                        <div className="w-16 h-10 bg-zinc-900 rounded flex items-center justify-center text-white text-xs">Video</div>
-                      ) : (
-                        <img src={`/api/uploads/${m.path}`} alt={m.filename} className="w-16 h-10 object-cover rounded" />
-                      )}
-                      <span className="flex-1 text-sm truncate text-zinc-900">{m.filename}</span>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs text-zinc-500">do:</span>
-                        {index < assignedMedia.length - 1 ? (
-                          <input
-                            type="time"
-                            value={showUntilMap[mediaId] || ""}
-                            onChange={(e) => setShowUntilMap((prev) => ({ ...prev, [mediaId]: e.target.value }))}
-                            className="border rounded px-2 py-1 text-xs text-zinc-900 w-24"
-                          />
-                        ) : (
-                          <span className="text-xs text-zinc-500 italic">konce dne</span>
-                        )}
-                      </div>
-                      <div className="flex gap-1">
-                        <button onClick={() => moveUp(index)} className="text-xs px-2 py-1 bg-zinc-700 text-white rounded hover:bg-zinc-800">&uarr;</button>
-                        <button onClick={() => moveDown(index)} className="text-xs px-2 py-1 bg-zinc-700 text-white rounded hover:bg-zinc-800">&darr;</button>
-                        <button onClick={() => toggleMedia(mediaId)} className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200">Odebrat</button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <SortableMediaList
+                mediaIds={assignedMedia}
+                allMedia={allMedia}
+                showUntilMap={showUntilMap}
+                showTimeInputs={true}
+                onReorder={setAssignedMedia}
+                onRemove={(id) => toggleMedia(id)}
+                onShowUntilChange={(id, val) => setShowUntilMap((prev) => ({ ...prev, [id]: val }))}
+              />
             )}
           </div>
 
@@ -1011,28 +901,13 @@ export default function DisplayEditPage({
             {assignedMedia.length === 0 ? (
               <p className="text-zinc-500 text-sm">Žádná média. Vyberte z dostupných níže.</p>
             ) : (
-              <div className="space-y-2">
-                {assignedMedia.map((mediaId, index) => {
-                  const m = allMedia.find((m) => m.id === mediaId);
-                  if (!m) return null;
-                  return (
-                    <div key={mediaId} className="flex items-center gap-3 bg-zinc-50 rounded-md p-2">
-                      <span className="text-xs text-zinc-900 w-6 text-center font-medium">{index + 1}</span>
-                      {isVideo(m.mimeType) ? (
-                        <div className="w-16 h-10 bg-zinc-900 rounded flex items-center justify-center text-white text-xs">Video</div>
-                      ) : (
-                        <img src={`/api/uploads/${m.path}`} alt={m.filename} className="w-16 h-10 object-cover rounded" />
-                      )}
-                      <span className="flex-1 text-sm truncate text-zinc-900">{m.filename}</span>
-                      <div className="flex gap-1">
-                        <button onClick={() => moveUp(index)} className="text-xs px-2 py-1 bg-zinc-700 text-white rounded hover:bg-zinc-800">&uarr;</button>
-                        <button onClick={() => moveDown(index)} className="text-xs px-2 py-1 bg-zinc-700 text-white rounded hover:bg-zinc-800">&darr;</button>
-                        <button onClick={() => toggleMedia(mediaId)} className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200">Odebrat</button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <SortableMediaList
+                mediaIds={assignedMedia}
+                allMedia={allMedia}
+                showTimeInputs={false}
+                onReorder={setAssignedMedia}
+                onRemove={(id) => toggleMedia(id)}
+              />
             )}
           </div>
 
@@ -1110,6 +985,8 @@ export default function DisplayEditPage({
           Zobrazit na TV
         </a>
       </div>
+
+      <DisplayPreview displayId={id} />
     </div>
   );
 }

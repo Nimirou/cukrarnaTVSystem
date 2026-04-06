@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 const navItems = [
@@ -16,7 +16,18 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Login page has no sidebar
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/admin/login");
+  };
 
   return (
     <div className="flex flex-col md:flex-row h-screen">
@@ -60,6 +71,12 @@ export default function AdminLayout({
               </Link>
             );
           })}
+          <button
+            onClick={handleLogout}
+            className="block w-full text-left px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 mt-1"
+          >
+            Odhlásit se
+          </button>
         </nav>
       )}
 
@@ -89,6 +106,14 @@ export default function AdminLayout({
             );
           })}
         </nav>
+        <div className="p-2 border-t border-zinc-700">
+          <button
+            onClick={handleLogout}
+            className="block w-full text-left px-3 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800"
+          >
+            Odhlásit se
+          </button>
+        </div>
       </aside>
 
       <main className="flex-1 bg-zinc-50 overflow-auto">{children}</main>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getActiveItem } from "@/lib/schedule";
 
 interface Media {
   id: string;
@@ -13,6 +14,8 @@ interface Media {
 interface DisplayItem {
   id: string;
   order: number;
+  showUntil: string | null;
+  scheduleDate: string | null;
   media: Media;
 }
 
@@ -21,6 +24,7 @@ interface Display {
   name: string;
   mode: string;
   interval: number;
+  scheduleMode: string;
   updatedAt: string;
   items: DisplayItem[];
 }
@@ -31,9 +35,36 @@ const modeLabels: Record<string, string> = {
   slideshow: "Slideshow",
 };
 
+function getNowPlaying(display: Display, now: Date): DisplayItem | null {
+  if (display.items.length === 0) return null;
+
+  if (display.scheduleMode === "none") {
+    return display.items[0] || null;
+  }
+
+  const scheduleItems = display.items.map((item) => ({
+    order: item.order,
+    showUntil: item.showUntil,
+    scheduleDate: item.scheduleDate,
+  }));
+
+  const { activeIndex } = getActiveItem(
+    scheduleItems,
+    display.scheduleMode as "daily" | "date",
+    now
+  );
+
+  if (activeIndex >= 0 && activeIndex < display.items.length) {
+    return display.items[activeIndex];
+  }
+
+  return null;
+}
+
 export default function AdminDashboard() {
   const [displays, setDisplays] = useState<Display[]>([]);
   const [mediaCount, setMediaCount] = useState(0);
+  const [now, setNow] = useState(new Date());
 
   useEffect(() => {
     fetch("/api/displays")
@@ -42,6 +73,12 @@ export default function AdminDashboard() {
     fetch("/api/media")
       .then((r) => r.json())
       .then((m: Media[]) => setMediaCount(m.length));
+  }, []);
+
+  // Auto-refresh now-playing every 60s
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(timer);
   }, []);
 
   const totalItems = displays.reduce((sum, d) => sum + d.items.length, 0);
@@ -75,10 +112,9 @@ export default function AdminDashboard() {
       <h2 className="text-lg font-semibold mb-4">Televize</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {displays.map((d) => {
-          const firstImage = d.items.find((i) =>
-            i.media.mimeType.startsWith("image/")
-          );
+          const nowPlaying = getNowPlaying(d, now);
           const hasContent = d.items.length > 0;
+          const isImage = nowPlaying?.media.mimeType.startsWith("image/");
 
           return (
             <div
@@ -87,12 +123,16 @@ export default function AdminDashboard() {
             >
               {/* Preview */}
               <div className="aspect-video bg-zinc-900 relative">
-                {firstImage ? (
+                {nowPlaying && isImage ? (
                   <img
-                    src={`/api/uploads/${firstImage.media.path}`}
-                    alt={firstImage.media.filename}
+                    src={`/api/uploads/${nowPlaying.media.path}`}
+                    alt={nowPlaying.media.filename}
                     className="w-full h-full object-cover"
                   />
+                ) : nowPlaying ? (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <p className="text-white text-sm">Video</p>
+                  </div>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <p className="text-white text-sm">Žádný náhled</p>
@@ -109,6 +149,19 @@ export default function AdminDashboard() {
                     {hasContent ? "Aktivní" : "Prázdný"}
                   </span>
                 </div>
+                {/* Now playing overlay */}
+                {nowPlaying && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-3 py-1.5 flex items-center gap-2">
+                    <span className="text-green-400 text-xs">&#9654;</span>
+                    <span className="text-white text-xs truncate">
+                      {d.scheduleMode !== "none"
+                        ? `Právě hraje: ${nowPlaying.media.filename}`
+                        : d.mode === "slideshow"
+                          ? `Slideshow (${d.items.length} položek)`
+                          : nowPlaying.media.filename}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Info */}
@@ -116,12 +169,16 @@ export default function AdminDashboard() {
                 <h3 className="font-semibold text-lg">{d.name}</h3>
                 <div className="mt-2 space-y-1 text-sm text-zinc-900">
                   <p>
-                    Režim: <span className="text-zinc-700">{modeLabels[d.mode] || d.mode}</span>
+                    Režim: <span className="text-zinc-700">
+                      {d.scheduleMode !== "none"
+                        ? d.scheduleMode === "daily" ? "Denní plánování" : "Kalendář"
+                        : modeLabels[d.mode] || d.mode}
+                    </span>
                   </p>
                   <p>
                     Položek: <span className="text-zinc-700">{d.items.length}</span>
                   </p>
-                  {d.mode === "slideshow" && (
+                  {d.mode === "slideshow" && d.scheduleMode === "none" && (
                     <p>
                       Interval: <span className="text-zinc-700">{d.interval}s</span>
                     </p>
