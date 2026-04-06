@@ -36,25 +36,26 @@ model MediaTag {
 }
 
 model Display {
-  id        String   @id @default(cuid())
-  name      String
-  mode      String   @default("single")
-  interval  Int      @default(5)
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  name         String
+  mode         String   @default("single")
+  interval     Int      @default(5)
+  scheduleMode String   @default("none")
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
 
   items DisplayItem[]
 }
 
 model DisplayItem {
-  id    String @id @default(cuid())
-  order Int    @default(0)
+  id           String  @id @default(cuid())
+  order        Int     @default(0)
+  showUntil    String?
+  scheduleDate String?
 
   displayId String
   display   Display @relation(fields: [displayId], references: [id], onDelete: Cascade)
 
   mediaId String
   media   Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-
-  @@unique([displayId, mediaId])
 }

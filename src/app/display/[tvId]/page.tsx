@@ -11,7 +11,9 @@ interface ContentItem {
 interface DisplayContent {
   mode: string;
   interval: number;
+  scheduleMode: string;
   updatedAt: string;
+  nextTransition: string | null;
   items: ContentItem[];
 }
 
@@ -86,6 +88,23 @@ export default function DisplayPage({
       });
     }
   }, []);
+
+  // Timer for scheduled transitions
+  useEffect(() => {
+    if (!content?.nextTransition) return;
+
+    const delay = new Date(content.nextTransition).getTime() - Date.now();
+    const timeout = setTimeout(fetchContent, Math.max(delay, 0));
+    return () => clearTimeout(timeout);
+  }, [content?.nextTransition, fetchContent]);
+
+  // Safety poll when scheduling is active (clock drift, sleep/wake)
+  useEffect(() => {
+    if (!content || content.scheduleMode === "none") return;
+
+    const safetyInterval = setInterval(fetchContent, 60_000);
+    return () => clearInterval(safetyInterval);
+  }, [content?.scheduleMode, fetchContent]);
 
   const advance = useCallback(() => {
     setFadeIn(false);

@@ -38,6 +38,7 @@ export async function PUT(
         name: body.name,
         mode: body.mode,
         interval: body.interval,
+        scheduleMode: body.scheduleMode ?? "none",
       },
     });
 
@@ -51,6 +52,8 @@ export async function PUT(
             displayId: id,
             mediaId: item.mediaId,
             order: item.order,
+            showUntil: item.showUntil ?? null,
+            scheduleDate: item.scheduleDate ?? null,
           },
         });
       }
