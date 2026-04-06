@@ -17,4 +17,5 @@ jobs:
           script: |
             cd /opt/cukrarna
             git pull origin master
+            touch .env.production
             docker compose up -d --build
