@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getActiveItem } from "@/lib/schedule";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,6 +38,8 @@ export async function GET(
       updatedAt: display.updatedAt.toISOString(),
       nextTransition: null,
       items: allItems,
+    }, {
+      headers: { "Cache-Control": "no-store" },
     });
   }
 
@@ -62,5 +66,7 @@ export async function GET(
     updatedAt: display.updatedAt.toISOString(),
     nextTransition,
     items: activeItems,
+  }, {
+    headers: { "Cache-Control": "no-store" },
   });
 }
