@@ -255,7 +255,7 @@ function Calendar({
           const hasSchedule = schedule && schedule.mediaIds.length > 0;
 
           // Build mini timeline segments
-          let miniSegments: { widthPercent: number; colorIdx: number }[] = [];
+          const miniSegments: { widthPercent: number; colorIdx: number }[] = [];
           if (hasSchedule) {
             let prevEnd = 0;
             for (let si = 0; si < schedule.mediaIds.length; si++) {

@@ -99,12 +99,13 @@ export default function DisplayPage({
   }, [content?.nextTransition, fetchContent]);
 
   // Safety poll when scheduling is active (clock drift, sleep/wake)
+  const scheduleMode = content?.scheduleMode;
   useEffect(() => {
-    if (!content || content.scheduleMode === "none") return;
+    if (!scheduleMode || scheduleMode === "none") return;
 
     const safetyInterval = setInterval(fetchContent, 60_000);
     return () => clearInterval(safetyInterval);
-  }, [content?.scheduleMode, fetchContent]);
+  }, [scheduleMode, fetchContent]);
 
   const advance = useCallback(() => {
     setFadeIn(false);
