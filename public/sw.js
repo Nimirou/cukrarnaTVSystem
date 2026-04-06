@@ -1,9 +1,8 @@
-const CACHE_NAME = "cukrarna-signage-v1";
+const CACHE_NAME = "cukrarna-signage-v2";
 
 // Cache display pages and API responses
 const CACHEABLE_PATTERNS = [
   /\/display\//,
-  /\/api\/displays\/.*\/content/,
   /\/api\/uploads\//,
   /\/_next\//,
 ];
