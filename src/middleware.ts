@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifySessionCookie, SESSION_COOKIE_NAME } from "@/lib/auth";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public admin route: login page
@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
 
   // Check session cookie
   const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const isAuthenticated = sessionCookie ? verifySessionCookie(sessionCookie) : false;
+  const isAuthenticated = sessionCookie ? await verifySessionCookie(sessionCookie) : false;
 
   if (!isAuthenticated) {
     // API routes get 401

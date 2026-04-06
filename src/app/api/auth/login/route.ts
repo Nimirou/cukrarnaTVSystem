@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Nesprávné heslo" }, { status: 401 });
   }
 
-  const token = createSessionCookie();
+  const token = await createSessionCookie();
   const response = NextResponse.json({ success: true });
 
   response.cookies.set(SESSION_COOKIE_NAME, token, {
