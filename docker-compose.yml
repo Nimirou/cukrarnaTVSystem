@@ -6,6 +6,8 @@ services:
     volumes:
       - uploads:/app/uploads
       - dbdata:/app/data
+    env_file:
+      - .env.production
     restart: always
 
 volumes:
