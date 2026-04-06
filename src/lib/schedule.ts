@@ -9,32 +9,61 @@ interface ScheduleResult {
   nextTransition: string | null;
 }
 
+const TIMEZONE = process.env.TIMEZONE || "Europe/Prague";
+
+function getLocalTime(now: Date): string {
+  return now.toLocaleTimeString("en-GB", {
+    timeZone: TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function getLocalDate(now: Date): string {
+  // en-CA locale gives YYYY-MM-DD format
+  return now.toLocaleDateString("en-CA", { timeZone: TIMEZONE });
+}
+
+function getLocalNextMidnight(now: Date): Date {
+  // Get tomorrow's date in local timezone, then create a Date at midnight
+  const todayLocal = getLocalDate(now);
+  const [y, m, d] = todayLocal.split("-").map(Number);
+  // Create date string for tomorrow midnight in the timezone
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowLocal = getLocalDate(tomorrow);
+  // Parse as UTC then adjust — simpler: just add remaining ms until midnight
+  const currentLocal = getLocalTime(now);
+  const [ch, cm] = currentLocal.split(":").map(Number);
+  const minutesLeft = (24 * 60) - (ch * 60 + cm);
+  return new Date(now.getTime() + minutesLeft * 60 * 1000);
+}
+
 function findActiveByTime(
   items: ScheduleItem[],
   now: Date
 ): ScheduleResult {
-  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const currentTime = getLocalTime(now);
 
   for (let i = 0; i < items.length; i++) {
     const until = items[i].showUntil;
     if (!until) {
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(0, 0, 0, 0);
-      return { activeIndex: i, nextTransition: tomorrow.toISOString() };
+      const nextMidnight = getLocalNextMidnight(now);
+      return { activeIndex: i, nextTransition: nextMidnight.toISOString() };
     }
     if (currentTime < until) {
-      const [h, m] = until.split(":").map(Number);
-      const transition = new Date(now);
-      transition.setHours(h, m, 0, 0);
+      // Compute transition time: how many minutes until `until`
+      const [ch, cm] = currentTime.split(":").map(Number);
+      const [uh, um] = until.split(":").map(Number);
+      const diffMinutes = (uh * 60 + um) - (ch * 60 + cm);
+      const transition = new Date(now.getTime() + diffMinutes * 60 * 1000);
       return { activeIndex: i, nextTransition: transition.toISOString() };
     }
   }
 
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-  return { activeIndex: items.length - 1, nextTransition: tomorrow.toISOString() };
+  const nextMidnight = getLocalNextMidnight(now);
+  return { activeIndex: items.length - 1, nextTransition: nextMidnight.toISOString() };
 }
 
 export function getActiveItem(
@@ -52,8 +81,8 @@ export function getActiveItem(
     return findActiveByTime(sorted, now);
   }
 
-  // Date mode: filter items for today's date, then use daily time logic
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  // Date mode: filter items for today's date in local timezone
+  const todayStr = getLocalDate(now);
   const todayItems = sorted.filter((item) => item.scheduleDate === todayStr);
 
   if (todayItems.length === 0) {
@@ -63,7 +92,6 @@ export function getActiveItem(
   const result = findActiveByTime(todayItems, now);
 
   if (result.activeIndex >= 0) {
-    // Map back to original index in sorted array
     const originalIndex = sorted.indexOf(todayItems[result.activeIndex]);
     return { activeIndex: originalIndex, nextTransition: result.nextTransition };
   }
